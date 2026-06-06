@@ -4,7 +4,7 @@ subtitle: Unity Tic-Tac-Toe with responsive UI and win animations
 techBadge: Unity 2D
 gifUrl: /games/gato.gif
 repoUrl: [https://github.com/AbrahamSanchezDev/Gato](https://github.com/AbrahamSanchezDev/Gato)
-demoUrl: ""
+demoUrl: "https://abrahamsanchezdev.github.io/Gato/"
 challenge: "Implemented responsive turn-based logic, win detection, and animated UI feedback in Unity while keeping game state clean and restartable."
 architecture: "Event-driven MonoBehaviour flow with UI button listeners and coroutine-based animation."
 techStack:

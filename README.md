@@ -17,7 +17,7 @@ Players alternate between X and O on a 3x3 grid while the game checks for winnin
 ## 🖼️ Preview
 ![Preview](preview_1.png)
 
-- Demo URL: none public yet
+- Demo URL: [WebGL build](https://abrahamsanchezdev.github.io/Gato/)
 
 To publish a demo, build the project for WebGL and host the output on Netlify or GitHub Pages.
 
@@ -91,7 +91,7 @@ Los jugadores alternan entre X y O en una cuadrícula de 3x3 mientras el juego v
 
 ## 🖼️ Vista previa
 !["Preview de juego"](preview_1.png)
-- URL de demo: ninguna pública aún
+- URL de demo: [WebGL build](https://abrahamsanchezdev.github.io/Gato/)
 
 Para publicar una demo, genera un build WebGL y aloja la salida en Netlify o GitHub Pages.
 
