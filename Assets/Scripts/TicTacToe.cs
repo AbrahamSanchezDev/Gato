@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+#if UNITY_WEBGL
+using UnityEngine.SceneManagement;
+#endif
 
 public class TicTacToe : MonoBehaviour
 {
@@ -203,10 +206,16 @@ public class TicTacToe : MonoBehaviour
 
     public void QuitGame()
     {
-#if UnityWebGL
+#if UNITY_WEBGL
+        // Note: This is a workaround since WebGL does not support Application.Quit().
         // In WebGL, we can't quit the application, so we can reload the scene instead
-        ScenarioManager.LoadScene(SceneManager.GetActiveScene().name);
-#endif
+        // Reloading the scene will reset the game state, effectively "quitting" the current game.
+        Scene currentScene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(currentScene.name);
+        return;
+
+#else
         Application.Quit();
+#endif
     }
 }
