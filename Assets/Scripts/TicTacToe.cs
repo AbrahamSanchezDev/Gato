@@ -12,14 +12,37 @@ public class TicTacToe : MonoBehaviour
     private string currentPlayer;
     private int movesCount;
     private bool gameActive;
+    private Color originalButtonColor;
+
+    private AudioSource audioSource;
+    [SerializeField] private AudioClip winSound;
+
+    private AudioClip originalAudioClip;
+    private void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource)
+            originalAudioClip = audioSource.clip;
+    }
 
     void Start()
     {
+        buttons = buttonsGo.GetComponentsInChildren<Button>();
+        if (buttons != null && buttons.Length > 0)
+        {
+            originalButtonColor = buttons[0].image.color;
+        }
+        else
+        {
+            originalButtonColor = Color.white; // Default color if buttons are not assigned
+            originalButtonColor.a = 0.5f; // Semi-transparent to indicate uninitialized state
+        }
         StartGame();
     }
 
     void StartGame()
     {
+        ResetButtonsSize();
         currentPlayer = "X";
         movesCount = 0;
         gameActive = true;
@@ -31,9 +54,9 @@ public class TicTacToe : MonoBehaviour
         {
             btn.GetComponentInChildren<TMP_Text>().text = "";
             btn.interactable = true;
-            btn.image.color = Color.white;
+            btn.image.color = originalButtonColor;
             btn.onClick.RemoveAllListeners();
-            int capturedIndex = index; // Capturar el índice para el cierre
+            int capturedIndex = index;
             btn.onClick.AddListener(() => OnButtonClick(capturedIndex));
             index++;
         }
@@ -58,12 +81,12 @@ public class TicTacToe : MonoBehaviour
         }
     }
 
-    // Combinaciones ganadoras
+    // Define the winning conditions
     private int[][] _winConditions = new int[][]
     {
-        new int[] {0, 1, 2}, new int[] {3, 4, 5}, new int[] {6, 7, 8}, // Filas
-        new int[] {0, 3, 6}, new int[] {1, 4, 7}, new int[] {2, 5, 8}, // Columnas
-        new int[] {0, 4, 8}, new int[] {2, 4, 6} // Diagonales
+        new int[] {0, 1, 2}, new int[] {3, 4, 5}, new int[] {6, 7, 8}, // Rows
+        new int[] {0, 3, 6}, new int[] {1, 4, 7}, new int[] {2, 5, 8}, // Columns
+        new int[] {0, 4, 8}, new int[] {2, 4, 6} // Diagonals
     };
 
     private int[][] winConditions
@@ -82,17 +105,18 @@ public class TicTacToe : MonoBehaviour
             {
                 gameActive = false;
                 HighlightWinningButtons(condition);
-                statusText.text = "¡Jugador " + currentPlayer + " gana!";
+                PlayWinSound();
+                statusText.text = "Jugador " + currentPlayer + " gana!";
                 restartPanel.SetActive(true);
                 return;
             }
         }
 
-        // Verificar empate
+        // Check for draw
         if (movesCount == 9)
         {
             gameActive = false;
-            statusText.text = "¡Empate!";
+            statusText.text = "Empate!";
             restartPanel.SetActive(true);
         }
     }
@@ -102,8 +126,70 @@ public class TicTacToe : MonoBehaviour
         foreach (int index in indices)
         {
             buttons[index].image.color = Color.green;
+            StartCoroutine(AnimateButtonPulseCo(buttons[index]));
         }
     }
+
+    #region Visual Effects
+    private System.Collections.IEnumerator AnimateButtonPulseCo(Button button, bool continuePulsing = true)
+    {
+        float pulseDuration = 0.5f;
+        float elapsedTime = 0f;
+        Vector3 originalScale = button.transform.localScale;
+        Vector3 targetScale = originalScale * 1.2f;
+
+        while (continuePulsing)
+        {
+            // Pulsar hacia afuera
+            while (elapsedTime < pulseDuration)
+            {
+                button.transform.localScale = Vector3.Lerp(originalScale, targetScale, elapsedTime / pulseDuration);
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+            // Pulsar hacia adentro
+            elapsedTime = 0f;
+            while (elapsedTime < pulseDuration)
+            {
+                button.transform.localScale = Vector3.Lerp(targetScale, originalScale, elapsedTime / pulseDuration);
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+            elapsedTime = 0f; // Reiniciar el tiempo para el siguiente ciclo
+        }
+
+    }
+
+    private void PlayWinSound()
+    {
+        if (audioSource && winSound)
+        {
+            audioSource.clip = winSound;
+            audioSource.Play();
+        }
+    }
+    private void PlayOriginalAudio()
+    {
+        if (audioSource && originalAudioClip)
+        {
+            audioSource.clip = originalAudioClip;
+            audioSource.Play();
+        }
+    }
+    #endregion
+
+    private void ResetButtonsSize()
+    {
+        StopAllCoroutines();
+        foreach (Button btn in buttons)
+        {
+            btn.transform.localScale = Vector3.one;
+        }
+        PlayOriginalAudio();
+    }
+
 
     void UpdateStatusText()
     {
@@ -117,6 +203,10 @@ public class TicTacToe : MonoBehaviour
 
     public void QuitGame()
     {
+#if UnityWebGL
+        // In WebGL, we can't quit the application, so we can reload the scene instead
+        ScenarioManager.LoadScene(SceneManager.GetActiveScene().name);
+#endif
         Application.Quit();
     }
 }
